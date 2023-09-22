@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Fiszki</string>
+    <string name="card_image">An image to represent card\'s term</string>
+    <string name="cards_list">A vertical, scrollable list of cards</string>
+    <string name="deck_name_placeholder">A deck of cards</string>
+    <string name="card_term_placeholder">A term</string>
+    <string name="card_definition_placeholder">A definition describing\nthe term</string>
+    <string name="menu_button">A button to open the menu</string>
+    <string name="add_card_button">A button that will add a new card</string>
+</resources>
