@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class EditableCard() : Fragment() {
+class EditableCard : Fragment() {
 
     private var term: String? = null
     private var definition: String? = null

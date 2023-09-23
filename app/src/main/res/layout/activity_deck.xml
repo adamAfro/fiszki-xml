@@ -8,7 +8,7 @@
     app:layout_anchorGravity="center_horizontal"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:context=".MainActivity">
+    tools:context=".Deck">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -37,7 +37,6 @@
                         android:id="@+id/deckName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0"
                         android:paddingHorizontal="30dp"
                         android:text="@string/deck_name_placeholder"
                         android:textSize="24sp" />
@@ -45,7 +44,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
                         android:orientation="horizontal">
 
                         <Spinner
@@ -90,7 +88,7 @@
                 android:paddingVertical="60dp">
 
                 <ImageButton
-                    android:id="@+id/addButton"
+                    android:id="@+id/addCardButton"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_weight="0"
