@@ -66,6 +66,7 @@ class Deck : AppCompatActivity() {
             val deckWithCards = reloadDeckWithCards()
 
             withContext(Dispatchers.Main) {
+                deckId = deckWithCards.deck.id
                 renderCards(deckWithCards.cards)
                 rename(deckWithCards.deck.name)
             }
