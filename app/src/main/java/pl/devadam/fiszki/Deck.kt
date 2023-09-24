@@ -24,7 +24,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-
+// TODO: initial deck is saved in history so after deleting it it may be restored for a moment
 class Deck : AppCompatActivity() {
 
     private var deckId: Long? = null
@@ -44,6 +44,7 @@ class Deck : AppCompatActivity() {
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+        val removeButton = findViewById<ImageButton>(R.id.removeDeckButton)
 
         setupTextWatcher(nameText) {
 
@@ -71,6 +72,15 @@ class Deck : AppCompatActivity() {
                     renderCard(card)
                 }
             }
+        }
+
+        removeButton.setOnClickListener {
+
+            CoroutineScope(Dispatchers.IO).launch { remove() }
+
+            startActivity(Intent(this, Pocket::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            })
         }
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -109,6 +119,19 @@ class Deck : AppCompatActivity() {
                 continuation.resumeWithException(RuntimeException("TTS initialization failed"))
             }
         }
+    }
+
+    private fun remove() {
+
+        if (deckId == null)
+            throw Exception("Deck ID is not set")
+
+        val dao = DatabaseManager
+            .getAppDatabase(applicationContext)
+            .cardsDao()
+
+        dao.deleteDeck(deckId!!)
+        dao.deleteCardsInDeck(deckId!!)
     }
 
     private fun reloadDeckWithCards(): DeckWithCards {

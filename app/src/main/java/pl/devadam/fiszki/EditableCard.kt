@@ -6,8 +6,12 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 
@@ -33,6 +37,7 @@ class EditableCard private constructor(
         )
 
         val termView = view.findViewById<TextView>(R.id.term)
+        val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
 
         termView.text = term
         setupTextWatcher(termView) {
@@ -56,6 +61,13 @@ class EditableCard private constructor(
                 .cardsDao()
 
             dao.updateDefinition(id, definition)
+        }
+
+        removeButton.setOnClickListener {
+
+            CoroutineScope(Dispatchers.IO).launch { remove() }
+
+            (view?.parent as? ViewGroup)?.removeView(view)
         }
 
         return view
@@ -82,6 +94,15 @@ class EditableCard private constructor(
                 if (timer != null) timer?.cancel()
             }
         })
+    }
+
+    private fun remove() {
+
+        val dao = DatabaseManager
+            .getAppDatabase(requireContext())
+            .cardsDao()
+
+        dao.deleteCard(id)
     }
 
     companion object {
