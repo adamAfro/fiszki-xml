@@ -43,23 +43,10 @@
                         android:text="@string/deck_name_placeholder"
                         android:textSize="24sp" />
 
-                    <LinearLayout
+                    <Spinner
+                        android:id="@+id/spinnerVoice"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/spinnerMic"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1" />
-
-                        <Spinner
-                            android:id="@+id/spinnerVoice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1" />
-                    </LinearLayout>
+                        android:layout_height="48dp" />
 
                 </LinearLayout>
 

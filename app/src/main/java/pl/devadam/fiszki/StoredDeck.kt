@@ -28,6 +28,5 @@ data class StoredDeck(
     @ColumnInfo(name = "id") val id: Long = 0,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "preferred_voice") val preferredVoice: String? = null,
-    @ColumnInfo(name = "preferred_recognition") val preferredRecognition: String? = null,
     @ColumnInfo(name = "last_access") val lastAccess: Date = Date(System.currentTimeMillis())
 )
