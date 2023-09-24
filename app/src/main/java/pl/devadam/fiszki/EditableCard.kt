@@ -1,23 +1,24 @@
 package pl.devadam.fiszki
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import java.util.Timer
+import java.util.TimerTask
 
-class EditableCard : Fragment() {
-
-    private var term: String? = null
-    private var definition: String? = null
+class EditableCard private constructor(
+    private val id: Long,
+    private var term: String,
+    private var definition: String
+): Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            term = it.getString(ARG_TERM)
-            definition = it.getString(ARG_DEFINITION)
-        }
     }
 
     override fun onCreateView(
@@ -31,26 +32,72 @@ class EditableCard : Fragment() {
             container, false
         )
 
-        val termTextView = view.findViewById<TextView>(R.id.term)
-        val definitionTextView = view.findViewById<TextView>(R.id.definition)
+        val termView = view.findViewById<TextView>(R.id.term)
 
-        termTextView.text = term
-        definitionTextView.text = definition
+        termView.text = term
+        setupTextWatcher(termView) {
+
+            term = it
+            val dao = DatabaseManager
+                .getAppDatabase(requireContext())
+                .cardsDao()
+
+            dao.updateTerm(id, term)
+        }
+
+        val definitionView = view.findViewById<TextView>(R.id.definition)
+
+        definitionView.text = definition
+        setupTextWatcher(definitionView) {
+
+            definition = it
+            val dao = DatabaseManager
+                .getAppDatabase(requireContext())
+                .cardsDao()
+
+            dao.updateDefinition(id, definition)
+        }
 
         return view
     }
 
+    private fun setupTextWatcher(textView: TextView, updateAction: (String) -> Unit) {
+
+        textView.addTextChangedListener(object : TextWatcher {
+
+            private var timer: Timer? = null
+
+            override fun afterTextChanged(arg0: Editable?) {
+                timer = Timer()
+                timer!!.schedule(object : TimerTask() {
+                    override fun run() {
+                        updateAction(textView.text.toString())
+                    }
+                }, 600)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (timer != null) timer?.cancel()
+            }
+        })
+    }
+
     companion object {
+
+        private const val ARG_ID = "arg_id"
         private const val ARG_TERM = "arg_term"
         private const val ARG_DEFINITION = "arg_definition"
 
-        fun newInstance(term: String, definition: String): EditableCard {
-            val fragment = EditableCard()
-            val args = Bundle()
-            args.putString(ARG_TERM, term)
-            args.putString(ARG_DEFINITION, definition)
-            fragment.arguments = args
-            return fragment
+        fun newInstance(id: Long, term: String, definition: String): EditableCard {
+            return EditableCard(id, term, definition).apply {
+                arguments = Bundle().apply {
+                    putLong(ARG_ID, id)
+                    putString(ARG_TERM, term)
+                    putString(ARG_DEFINITION, definition)
+                }
+            }
         }
     }
 }

@@ -2,6 +2,8 @@ package pl.devadam.fiszki
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Timer
+import java.util.TimerTask
 
 class Deck : AppCompatActivity() {
 
@@ -27,6 +31,17 @@ class Deck : AppCompatActivity() {
 
         val addButton = findViewById<ImageButton>(R.id.addCardButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
+        val nameText = findViewById<TextView>(R.id.deckName)
+
+        setupTextWatcher(nameText) {
+
+            val dao = DatabaseManager
+                .getAppDatabase(applicationContext)
+                .cardsDao()
+
+            if (deckId != null)
+                dao.updateDeckName(deckId!!, it)
+        }
 
         menuButton.setOnClickListener {
             startActivity(Intent(this, Pocket::class.java).apply {
@@ -121,5 +136,28 @@ class Deck : AppCompatActivity() {
         )
 
         addition.commit()
+    }
+
+    private fun setupTextWatcher(textView: TextView, updateAction: (String) -> Unit) {
+
+        textView.addTextChangedListener(object : TextWatcher {
+
+            private var timer: Timer? = null
+
+            override fun afterTextChanged(arg0: Editable?) {
+                timer = Timer()
+                timer!!.schedule(object : TimerTask() {
+                    override fun run() {
+                        updateAction(textView.text.toString())
+                    }
+                }, 600)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (timer != null) timer?.cancel()
+            }
+        })
     }
 }

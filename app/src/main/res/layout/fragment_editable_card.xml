@@ -19,7 +19,7 @@
             android:orientation="vertical"
             android:padding="30dp">
 
-            <TextView
+            <EditText
                 android:id="@+id/term"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -28,15 +28,17 @@
                 android:maxLines="2"
                 android:text="@string/card_term_placeholder"
                 android:textAlignment="gravity"
+                android:inputType="text"
                 android:textSize="20sp" />
 
-            <TextView
+            <EditText
                 android:id="@+id/definition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:lines="3"
                 android:paddingVertical="15dp"
+                android:inputType="text"
                 android:text="@string/card_definition_placeholder"
                 android:textSize="12sp" />
 
