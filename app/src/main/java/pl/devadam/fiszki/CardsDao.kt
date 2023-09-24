@@ -44,6 +44,9 @@ interface CardsDao {
     @Query("UPDATE stored_decks SET name = :name WHERE id = :deckId")
     fun updateDeckName(deckId: Long, name: String)
 
+    @Query("UPDATE stored_decks SET preferred_voice = :voiceName WHERE id = :deckId")
+    fun updateDeckPreferredVoice(deckId: Long, voiceName: String)
+
 
     @Query("SELECT * FROM stored_cards WHERE deck_id = :deckId")
     fun getCardsFromDeck(deckId: Long): List<StoredCard>

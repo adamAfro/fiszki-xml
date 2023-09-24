@@ -5,7 +5,8 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Spinner
@@ -44,6 +45,26 @@ class Deck : AppCompatActivity() {
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+
+        voiceSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+
+                val selectedVoiceName = parent?.getItemAtPosition(position).toString()
+                val voice = textToSpeech.voices.firstOrNull() { it.name == selectedVoiceName }
+
+                textToSpeech.voice = voice
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    changeVoice(selectedVoiceName)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Handle when nothing is selected (optional)
+            }
+        }
+
         val removeButton = findViewById<ImageButton>(R.id.removeDeckButton)
 
         setupTextWatcher(nameText) {
@@ -91,24 +112,26 @@ class Deck : AppCompatActivity() {
                 deckId = deckWithCards.deck.id
                 renderCards(deckWithCards.cards)
                 rename(deckWithCards.deck.name)
+
+                async { initializeTTS() } .await()
+                val localVoices = textToSpeech.voices.filter { it.name.endsWith("-language") }
+                // TODO: fallback if voices are not ending with -language
+
+                val names = localVoices.map { it.name }
+
+                withContext(Dispatchers.Main) {
+                    voiceSpinner.adapter = ArrayAdapter(this@Deck, android.R.layout.simple_spinner_item, names)
+                }
+
+                if (deckWithCards.deck.preferredVoice != null)
+                    selectVoice(deckWithCards.deck.preferredVoice)
             }
         }
+    }
 
-        CoroutineScope(Dispatchers.IO).launch {
+    fun speak(text: String) {
 
-            async { initializeTTS() } .await()
-
-            val localVoices = textToSpeech.voices.filter { it.name.endsWith("-language") }
-            // TODO: fallback if voices are not ending with -language
-
-            val names = localVoices.map { it.name }
-
-            withContext(Dispatchers.Main) {
-                voiceSpinner.adapter = ArrayAdapter(this@Deck, android.R.layout.simple_spinner_item, names)
-            }
-
-            Log.i("TTS", "voices amount = ${localVoices.size}")
-        }
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
     private suspend fun initializeTTS(): Unit = suspendCoroutine { continuation ->
@@ -132,6 +155,16 @@ class Deck : AppCompatActivity() {
 
         dao.deleteDeck(deckId!!)
         dao.deleteCardsInDeck(deckId!!)
+    }
+
+    private fun changeVoice(name: String) {
+
+        val dao = DatabaseManager
+            .getAppDatabase(applicationContext)
+            .cardsDao()
+
+        if (deckId != null)
+            dao.updateDeckPreferredVoice(deckId!!, name)
     }
 
     private fun reloadDeckWithCards(): DeckWithCards {
@@ -172,6 +205,17 @@ class Deck : AppCompatActivity() {
         val nameText = findViewById<TextView>(R.id.deckName)
 
         nameText.text = name
+    }
+
+    private fun selectVoice(name: String) {
+
+        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+        val adapter = voiceSpinner.adapter
+
+        val pos = (0 until adapter.count)
+            .firstOrNull { adapter.getItem(it) == name } ?: 0
+
+        voiceSpinner.setSelection(pos)
     }
 
     private fun renderCards(cards: List<StoredCard>) {

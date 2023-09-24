@@ -36,6 +36,8 @@ class EditableCard private constructor(
             container, false
         )
 
+        val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
+
         val termView = view.findViewById<TextView>(R.id.term)
         val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
 
@@ -68,6 +70,11 @@ class EditableCard private constructor(
             CoroutineScope(Dispatchers.IO).launch { remove() }
 
             (view?.parent as? ViewGroup)?.removeView(view)
+        }
+
+        voiceButton.setOnClickListener {
+            
+            (activity as? Deck)?.speak(term)
         }
 
         return view
