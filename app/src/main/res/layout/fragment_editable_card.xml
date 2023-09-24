@@ -10,7 +10,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="#AFAFAF"
+        app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="30dp">
 
         <LinearLayout
@@ -20,25 +20,29 @@
             android:padding="30dp">
 
             <EditText
+                android:background="@color/white"
                 android:id="@+id/term"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:inputType="text"
                 android:lines="2"
                 android:maxLines="2"
                 android:text="@string/card_term_placeholder"
                 android:textAlignment="gravity"
-                android:inputType="text"
                 android:textSize="20sp" />
 
             <EditText
+                android:background="@color/white"
                 android:id="@+id/definition"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="63dp"
                 android:gravity="top"
-                android:lines="3"
-                android:paddingVertical="15dp"
                 android:inputType="text"
+                android:lines="3"
+                android:maxLines="3"
+                android:minLines="1"
+                android:paddingVertical="15dp"
                 android:text="@string/card_definition_placeholder"
                 android:textSize="12sp" />
 

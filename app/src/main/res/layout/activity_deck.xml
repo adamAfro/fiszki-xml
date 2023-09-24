@@ -24,7 +24,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical|end"
+                android:gravity="top|center_vertical|end"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -34,29 +34,30 @@
                     android:orientation="vertical">
 
                     <EditText
+                        android:background="@color/white"
                         android:id="@+id/deckName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:inputType="text"
                         android:paddingHorizontal="30dp"
                         android:text="@string/deck_name_placeholder"
-                        android:inputType="text"
                         android:textSize="24sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="48dp"
                         android:orientation="horizontal">
 
                         <Spinner
                             android:id="@+id/spinnerMic"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_weight="1" />
 
                         <Spinner
                             android:id="@+id/spinnerAudio"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_weight="1" />
                     </LinearLayout>
 
@@ -67,8 +68,9 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_weight="0"
+                    android:background="#00FFFFFF"
                     android:contentDescription="@string/menu_button"
-                    android:src="@drawable/ic_launcher_foreground" />
+                    android:src="@drawable/baseline_menu_64" />
 
             </LinearLayout>
 
@@ -90,11 +92,15 @@
 
                 <ImageButton
                     android:id="@+id/addCardButton"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="false"
+                    android:background="#00FFFFFF"
                     android:contentDescription="@string/add_card_button"
-                    android:src="@android:drawable/ic_input_add" />
+                    android:cropToPadding="true"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/baseline_add_box_64" />
+
             </LinearLayout>
 
         </LinearLayout>
