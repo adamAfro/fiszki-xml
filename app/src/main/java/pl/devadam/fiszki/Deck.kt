@@ -2,23 +2,34 @@ package pl.devadam.fiszki
 
 import android.content.Intent
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.ImageButton
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
+
 
 class Deck : AppCompatActivity() {
 
     private var deckId: Long? = null
+
+    private lateinit var textToSpeech: TextToSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -32,6 +43,7 @@ class Deck : AppCompatActivity() {
         val addButton = findViewById<ImageButton>(R.id.addCardButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
+        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
 
         setupTextWatcher(nameText) {
 
@@ -69,6 +81,32 @@ class Deck : AppCompatActivity() {
                 deckId = deckWithCards.deck.id
                 renderCards(deckWithCards.cards)
                 rename(deckWithCards.deck.name)
+            }
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            async { initializeTTS() } .await()
+
+            val localVoices = textToSpeech.voices.filter { it.name.endsWith("-language") }
+            // TODO: fallback if voices are not ending with -language
+
+            val names = localVoices.map { it.name }
+
+            withContext(Dispatchers.Main) {
+                voiceSpinner.adapter = ArrayAdapter(this@Deck, android.R.layout.simple_spinner_item, names)
+            }
+
+            Log.i("TTS", "voices amount = ${localVoices.size}")
+        }
+    }
+
+    private suspend fun initializeTTS(): Unit = suspendCoroutine { continuation ->
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                continuation.resume(Unit)
+            } else {
+                continuation.resumeWithException(RuntimeException("TTS initialization failed"))
             }
         }
     }
@@ -160,5 +198,11 @@ class Deck : AppCompatActivity() {
                 if (timer != null) timer?.cancel()
             }
         })
+    }
+
+    override fun onDestroy() {
+
+        textToSpeech.shutdown()
+        super.onDestroy()
     }
 }
