@@ -8,10 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Timer
 import java.util.TimerTask
 
@@ -19,7 +19,7 @@ class EditableCard private constructor(
     private val id: Long,
     private var term: String,
     private var definition: String
-): Fragment() {
+): Card(id, term, definition) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,53 +31,55 @@ class EditableCard private constructor(
         savedInstanceState: Bundle?
     ): View? {
 
+        super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater.inflate(
             R.layout.fragment_editable_card,
             container, false
         )
 
+        val termView = view.findViewById<TextView>(R.id.term)
+        val definitionView = view.findViewById<TextView>(R.id.definition)
         val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
 
-        val termView = view.findViewById<TextView>(R.id.term)
+        termView.text = term
+        definitionView.text = definition
+        voiceButton.setOnClickListener { synthetizeTerm() }
+
         val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
 
-        termView.text = term
-        setupTextWatcher(termView) {
-
-            term = it
-            val dao = DatabaseManager
-                .getAppDatabase(requireContext())
-                .cardsDao()
-
-            dao.updateTerm(id, term)
-        }
-
-        val definitionView = view.findViewById<TextView>(R.id.definition)
-
-        definitionView.text = definition
-        setupTextWatcher(definitionView) {
-
-            definition = it
-            val dao = DatabaseManager
-                .getAppDatabase(requireContext())
-                .cardsDao()
-
-            dao.updateDefinition(id, definition)
-        }
-
-        removeButton.setOnClickListener {
-
-            CoroutineScope(Dispatchers.IO).launch { remove() }
-
-            (view?.parent as? ViewGroup)?.removeView(view)
-        }
-
-        voiceButton.setOnClickListener {
-            
-            (activity as? Deck)?.speak(term)
-        }
+        setupTextWatcher(termView) { updateTerm(it) }
+        setupTextWatcher(definitionView) { updateDefinition(it) }
+        removeButton.setOnClickListener { remove() }
 
         return view
+    }
+
+    private fun updateTerm(term: String) {
+
+        this.term = term
+        val dao = DatabaseManager
+            .getAppDatabase(requireContext())
+            .cardsDao()
+
+        dao.updateTerm(id, term)
+    }
+
+    private fun updateDefinition(definition: String) {
+
+        this.definition = definition
+        val dao = DatabaseManager
+            .getAppDatabase(requireContext())
+            .cardsDao()
+
+        dao.updateDefinition(id, definition)
+    }
+
+    private fun remove() = CoroutineScope(Dispatchers.IO).launch {
+
+        removeFromDatabase()
+        withContext(Dispatchers.Main) {
+            (view?.parent as? ViewGroup)?.removeView(view)
+        }
     }
 
     private fun setupTextWatcher(textView: TextView, updateAction: (String) -> Unit) {
@@ -103,7 +105,7 @@ class EditableCard private constructor(
         })
     }
 
-    private fun remove() {
+    private fun removeFromDatabase() {
 
         val dao = DatabaseManager
             .getAppDatabase(requireContext())

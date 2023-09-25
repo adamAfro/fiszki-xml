@@ -16,45 +16,32 @@ class Pocket : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_pocket)
+
+        loadDecks()
 
         val addButton = findViewById<Button>(R.id.addDeckButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
 
-        menuButton.setOnClickListener {
-            startActivity(Intent(this, Deck::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-            })
-        }
-
-        addButton.setOnClickListener {
-
-            CoroutineScope(Dispatchers.IO).launch {
-
-                val deckId = addDeck()
-
-                withContext(Dispatchers.Main) {
-
-                    startActivity(Intent(this@Pocket, Deck::class.java).apply {
-                        putExtra("deck_id", deckId)
-                        flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-                    })
-                }
-            }
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val decks = loadDecks()
-
-            withContext(Dispatchers.Main) {
-                renderDecks(decks)
-            }
-        }
+        menuButton.setOnClickListener { redirectToDeck() }
+        addButton.setOnClickListener { addDeck() }
     }
 
-    private fun loadDecks(): List<StoredDeck> {
+    private fun addDeck() = CoroutineScope(Dispatchers.IO).launch {
+
+        val deckId = addDeckToDatabase()
+
+        withContext(Dispatchers.Main) { redirectToDeck(deckId) }
+    }
+
+    private fun loadDecks() = CoroutineScope(Dispatchers.IO).launch {
+
+        val decks = loadDecksFromDatabase()
+
+        withContext(Dispatchers.Main) { renderDecks(decks) }
+    }
+
+    private fun loadDecksFromDatabase(): List<StoredDeck> {
 
         val dao = DatabaseManager
             .getAppDatabase(applicationContext)
@@ -63,7 +50,7 @@ class Pocket : AppCompatActivity() {
         return dao.getAllDecks()
     }
 
-    private fun addDeck(): Long {
+    private fun addDeckToDatabase(): Long {
 
         val dao = DatabaseManager
             .getAppDatabase(applicationContext)
@@ -82,14 +69,18 @@ class Pocket : AppCompatActivity() {
             val button = Button(this)
 
             button.text = deck.name
-            button.setOnClickListener {
-
-                startActivity(Intent(this, Deck::class.java).apply {
-                    putExtra("deck_id", deck.id)
-                })
-            }
+            button.setOnClickListener {redirectToDeck(deck.id) }
 
             container.addView(button)
         }
+    }
+
+    private fun redirectToDeck(deckId: Long? = null) {
+
+        startActivity(Intent(this@Pocket, Deck::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            if (deckId != null)
+                putExtra("deck_id", deckId)
+        })
     }
 }

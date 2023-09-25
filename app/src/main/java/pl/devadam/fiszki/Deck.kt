@@ -3,8 +3,10 @@ package pl.devadam.fiszki
 import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -16,19 +18,16 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Timer
 import java.util.TimerTask
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 // TODO: initial deck is saved in history so after deleting it it may be restored for a moment
 class Deck : AppCompatActivity() {
 
     private var deckId: Long? = null
+    private var prefferedVoiceName: String? = null
 
     private lateinit var textToSpeech: TextToSpeech
 
@@ -41,92 +40,64 @@ class Deck : AppCompatActivity() {
         if (deckId!! < 0)
             deckId = null
 
+        textToSpeech = initializeTTS()
+        loadDeck()
+
         val addButton = findViewById<ImageButton>(R.id.addCardButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-
-        voiceSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
-                val selectedVoiceName = parent?.getItemAtPosition(position).toString()
-                val voice = textToSpeech.voices.firstOrNull() { it.name == selectedVoiceName }
-
-                textToSpeech.voice = voice
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    changeVoice(selectedVoiceName)
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Handle when nothing is selected (optional)
-            }
-        }
-
         val removeButton = findViewById<ImageButton>(R.id.removeDeckButton)
 
-        setupTextWatcher(nameText) {
+        menuButton.setOnClickListener { redirectToPocket() }
+        addButton.setOnClickListener { addCard() }
+        removeButton.setOnClickListener { remove() }
 
-            val dao = DatabaseManager
-                .getAppDatabase(applicationContext)
-                .cardsDao()
+        setupTextWatcher(nameText) { updateName(it) }
+        setupVoiceChangeWatcher(voiceSpinner, textToSpeech) { changeVoice(it) }
+    }
 
-            if (deckId != null)
-                dao.updateDeckName(deckId!!, it)
+    private fun updateName(name: String) {
+
+        val dao = DatabaseManager
+            .getAppDatabase(applicationContext)
+            .cardsDao()
+
+        if (deckId != null)
+            dao.updateDeckName(deckId!!, name)
+    }
+
+    private fun loadDeck() = CoroutineScope(Dispatchers.IO).launch {
+
+        val deckWithCards = loadDeckWithCardsFromDatabase()
+
+        withContext(Dispatchers.Main) {
+
+            deckId = deckWithCards.deck.id
+            renderCards(deckWithCards.cards)
+            rename(deckWithCards.deck.name)
+            if (deckWithCards.deck.preferredVoice != null)
+                selectVoice(deckWithCards.deck.preferredVoice)
         }
+    }
 
-        menuButton.setOnClickListener {
-            startActivity(Intent(this, Pocket::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-            })
-        }
+    private fun addCard() = CoroutineScope(Dispatchers.IO).launch {
 
-        addButton.setOnClickListener {
+        val card = addNewCard()
 
-            CoroutineScope(Dispatchers.IO).launch {
+        withContext(Dispatchers.Main) { renderCard(card) }
+    }
 
-                val card = addNewCard()
+    private fun remove() = CoroutineScope(Dispatchers.IO).launch {
 
-                withContext(Dispatchers.Main) {
-                    renderCard(card)
-                }
-            }
-        }
+        removeFromDatabase()
+        redirectToPocket()
+    }
 
-        removeButton.setOnClickListener {
+    private fun changeVoice(voice: Voice?) = CoroutineScope(Dispatchers.IO).launch {
 
-            CoroutineScope(Dispatchers.IO).launch { remove() }
-
-            startActivity(Intent(this, Pocket::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-            })
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val deckWithCards = reloadDeckWithCards()
-
-            withContext(Dispatchers.Main) {
-                deckId = deckWithCards.deck.id
-                renderCards(deckWithCards.cards)
-                rename(deckWithCards.deck.name)
-
-                async { initializeTTS() } .await()
-                val localVoices = textToSpeech.voices.filter { it.name.endsWith("-language") }
-                // TODO: fallback if voices are not ending with -language
-
-                val names = localVoices.map { it.name }
-
-                withContext(Dispatchers.Main) {
-                    voiceSpinner.adapter = ArrayAdapter(this@Deck, android.R.layout.simple_spinner_item, names)
-                }
-
-                if (deckWithCards.deck.preferredVoice != null)
-                    selectVoice(deckWithCards.deck.preferredVoice)
-            }
-        }
+        textToSpeech.voice = voice
+        changeVoiceInDatabase(voice?.name)
     }
 
     fun speak(text: String) {
@@ -134,17 +105,31 @@ class Deck : AppCompatActivity() {
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
-    private suspend fun initializeTTS(): Unit = suspendCoroutine { continuation ->
-        textToSpeech = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                continuation.resume(Unit)
-            } else {
-                continuation.resumeWithException(RuntimeException("TTS initialization failed"))
-            }
+    private fun initializeTTS() = TextToSpeech(this) { status ->
+
+        if (status != TextToSpeech.SUCCESS) {
+
+            Log.w("TTS", "initialization failed")
+
+            return@TextToSpeech
         }
+
+        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+        val localVoices = textToSpeech.voices.filter { it.name.endsWith("-language") }
+        // TODO: fallback if voices are not ending with -language
+
+        val names = localVoices.map { it.name }
+
+        voiceSpinner.adapter = ArrayAdapter(this@Deck,
+            android.R.layout.simple_spinner_item, names
+        )
+
+        if (prefferedVoiceName != null)
+            selectVoice(prefferedVoiceName!!)
     }
 
-    private fun remove() {
+
+    private fun removeFromDatabase() {
 
         if (deckId == null)
             throw Exception("Deck ID is not set")
@@ -157,7 +142,22 @@ class Deck : AppCompatActivity() {
         dao.deleteCardsInDeck(deckId!!)
     }
 
-    private fun changeVoice(name: String) {
+    private fun selectVoice(name: String) {
+
+        prefferedVoiceName = name
+        if (textToSpeech.voices == null)
+            return
+
+        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+        val adapter = voiceSpinner.adapter
+
+        val pos = (0 until adapter.count)
+            .firstOrNull { adapter.getItem(it) == name } ?: 0
+
+        voiceSpinner.setSelection(pos)
+    }
+
+    private fun changeVoiceInDatabase(name: String?) {
 
         val dao = DatabaseManager
             .getAppDatabase(applicationContext)
@@ -167,7 +167,7 @@ class Deck : AppCompatActivity() {
             dao.updateDeckPreferredVoice(deckId!!, name)
     }
 
-    private fun reloadDeckWithCards(): DeckWithCards {
+    private fun loadDeckWithCardsFromDatabase(): DeckWithCards {
 
         val dao = DatabaseManager.getAppDatabase(applicationContext).cardsDao()
 
@@ -207,17 +207,6 @@ class Deck : AppCompatActivity() {
         nameText.text = name
     }
 
-    private fun selectVoice(name: String) {
-
-        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-        val adapter = voiceSpinner.adapter
-
-        val pos = (0 until adapter.count)
-            .firstOrNull { adapter.getItem(it) == name } ?: 0
-
-        voiceSpinner.setSelection(pos)
-    }
-
     private fun renderCards(cards: List<StoredCard>) {
 
         val manager: FragmentManager = supportFragmentManager
@@ -244,6 +233,19 @@ class Deck : AppCompatActivity() {
         addition.commit()
     }
 
+    private fun setupVoiceChangeWatcher(voiceSpinner: Spinner, textToSpeech: TextToSpeech, changeVoice: (Voice?) -> Unit) {
+        voiceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedVoiceName = parent?.getItemAtPosition(position).toString()
+                val voice = textToSpeech.voices.firstOrNull { it.name == selectedVoiceName }
+                changeVoice(voice)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+
     private fun setupTextWatcher(textView: TextView, updateAction: (String) -> Unit) {
 
         textView.addTextChangedListener(object : TextWatcher {
@@ -264,6 +266,13 @@ class Deck : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (timer != null) timer?.cancel()
             }
+        })
+    }
+
+    private fun redirectToPocket() {
+
+        startActivity(Intent(this, Pocket::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         })
     }
 
