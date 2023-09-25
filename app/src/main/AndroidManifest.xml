@@ -13,10 +13,10 @@
         android:theme="@style/Theme.Fiszki"
         tools:targetApi="31">
         <activity
-            android:name=".Pocket"
+            android:name=".pocket.Activity"
             android:exported="false" />
         <activity
-            android:name=".Deck"
+            android:name=".deck.Activity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -8,7 +8,7 @@
     app:layout_anchorGravity="center_horizontal"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:context=".Deck">
+    tools:context=".deck.Activity">
 
     <ScrollView
         android:id="@+id/scrollView2"

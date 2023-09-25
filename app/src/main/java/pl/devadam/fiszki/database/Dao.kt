@@ -1,26 +1,19 @@
-package pl.devadam.fiszki
+package pl.devadam.fiszki.database
 
 import androidx.room.Dao
-import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Relation
 import androidx.room.Transaction
 
-data class DeckWithCards(
-    @Embedded val deck: StoredDeck,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "deck_id"
-    )
-    val cards: List<StoredCard>
-)
+import pl.devadam.fiszki.card.Entity as CardEntity
+import pl.devadam.fiszki.deck.Entity as DeckEntity
+import pl.devadam.fiszki.deck.RelatedEntity as DeckWithCardEntities
 
 @Dao
-interface CardsDao {
+interface Dao {
 
-    @Insert(entity = StoredCard::class)
-    fun insertCard(card: StoredCard): Long
+    @Insert(entity = CardEntity::class)
+    fun insertCard(card: CardEntity): Long
 
     @Query("DELETE FROM stored_cards WHERE id = :cardId")
     fun deleteCard(cardId: Long)
@@ -32,14 +25,14 @@ interface CardsDao {
     fun updateDefinition(cardId: Long, definition: String)
 
 
-    @Insert(entity = StoredDeck::class)
-    fun insertDeck(deck: StoredDeck): Long
+    @Insert(entity = DeckEntity::class)
+    fun insertDeck(deck: DeckEntity): Long
 
     @Query("DELETE FROM stored_decks WHERE id = :deckId")
     fun deleteDeck(deckId: Long)
 
     @Query("SELECT * FROM stored_decks")
-    fun getAllDecks(): List<StoredDeck>
+    fun getAllDecks(): List<DeckEntity>
 
     @Query("UPDATE stored_decks SET name = :name WHERE id = :deckId")
     fun updateDeckName(deckId: Long, name: String)
@@ -49,7 +42,7 @@ interface CardsDao {
 
 
     @Query("SELECT * FROM stored_cards WHERE deck_id = :deckId")
-    fun getCardsFromDeck(deckId: Long): List<StoredCard>
+    fun getCardsFromDeck(deckId: Long): List<CardEntity>
 
     @Query("DELETE FROM stored_cards WHERE deck_id = :deckId")
     fun deleteCardsInDeck(deckId: Long)
@@ -57,9 +50,9 @@ interface CardsDao {
 
     @Transaction
     @Query("SELECT * FROM stored_decks WHERE id = (SELECT id FROM stored_decks ORDER BY last_access DESC LIMIT 1)")
-    fun getLastAccessedDeckWithCards(): DeckWithCards?
+    fun getLastAccessedDeckWithCards(): DeckWithCardEntities?
 
     @Transaction
     @Query("SELECT * FROM stored_decks WHERE id = :deckId")
-    fun getDeckWithCards(deckId: Long): DeckWithCards?
+    fun getDeckWithCards(deckId: Long): DeckWithCardEntities?
 }

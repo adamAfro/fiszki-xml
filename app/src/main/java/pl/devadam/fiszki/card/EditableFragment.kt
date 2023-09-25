@@ -1,4 +1,4 @@
-package pl.devadam.fiszki
+package pl.devadam.fiszki.card
 
 import android.os.Bundle
 import android.text.Editable
@@ -8,18 +8,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.devadam.fiszki.R
+import pl.devadam.fiszki.deck.ViewModel
 import java.util.Timer
 import java.util.TimerTask
 
-class EditableCard private constructor(
+class EditableFragment constructor(
     private val id: Long,
     private var term: String,
     private var definition: String
-): Card(id, term, definition) {
+): StaticFragment(id, term, definition) {
+
+    private lateinit var viewModel: ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +42,8 @@ class EditableCard private constructor(
             container, false
         )
 
+        viewModel = ViewModelProvider(requireActivity()).get(ViewModel::class.java)
+
         val termView = view.findViewById<TextView>(R.id.term)
         val definitionView = view.findViewById<TextView>(R.id.definition)
         val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
@@ -47,36 +54,17 @@ class EditableCard private constructor(
 
         val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
 
-        setupTextWatcher(termView) { updateTerm(it) }
-        setupTextWatcher(definitionView) { updateDefinition(it) }
+        setupTextWatcher(termView) { viewModel.updateCardTerm(id, it) }
+        setupTextWatcher(definitionView) { viewModel.updateCardDefinition(id, it) }
         removeButton.setOnClickListener { remove() }
 
         return view
     }
 
-    private fun updateTerm(term: String) {
-
-        this.term = term
-        val dao = DatabaseManager
-            .getAppDatabase(requireContext())
-            .cardsDao()
-
-        dao.updateTerm(id, term)
-    }
-
-    private fun updateDefinition(definition: String) {
-
-        this.definition = definition
-        val dao = DatabaseManager
-            .getAppDatabase(requireContext())
-            .cardsDao()
-
-        dao.updateDefinition(id, definition)
-    }
-
     private fun remove() = CoroutineScope(Dispatchers.IO).launch {
 
-        removeFromDatabase()
+        viewModel.removeCard(id)
+
         withContext(Dispatchers.Main) {
             (view?.parent as? ViewGroup)?.removeView(view)
         }
@@ -105,29 +93,10 @@ class EditableCard private constructor(
         })
     }
 
-    private fun removeFromDatabase() {
-
-        val dao = DatabaseManager
-            .getAppDatabase(requireContext())
-            .cardsDao()
-
-        dao.deleteCard(id)
-    }
-
     companion object {
 
-        private const val ARG_ID = "arg_id"
-        private const val ARG_TERM = "arg_term"
-        private const val ARG_DEFINITION = "arg_definition"
-
-        fun newInstance(id: Long, term: String, definition: String): EditableCard {
-            return EditableCard(id, term, definition).apply {
-                arguments = Bundle().apply {
-                    putLong(ARG_ID, id)
-                    putString(ARG_TERM, term)
-                    putString(ARG_DEFINITION, definition)
-                }
-            }
+        fun newInstance(id: Long, term: String, definition: String): EditableFragment {
+            return EditableFragment(id, term, definition)
         }
     }
 }
