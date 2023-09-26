@@ -37,8 +37,8 @@ interface Dao {
     @Query("UPDATE stored_decks SET name = :name WHERE id = :deckId")
     fun updateDeckName(deckId: Long, name: String)
 
-    @Query("UPDATE stored_decks SET preferred_voice = :voiceName WHERE id = :deckId")
-    fun updateDeckPreferredVoice(deckId: Long, voiceName: String?)
+    @Query("UPDATE stored_decks SET voice_name = :voiceName WHERE id = :deckId")
+    fun updateDeckVoiceName(deckId: Long, voiceName: String?)
 
 
     @Query("SELECT * FROM stored_cards WHERE deck_id = :deckId")

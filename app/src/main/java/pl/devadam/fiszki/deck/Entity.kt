@@ -11,7 +11,7 @@ import java.sql.Date
 data class Entity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0,
-    @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "preferred_voice") val preferredVoice: String? = null,
-    @ColumnInfo(name = "last_access") val lastAccess: Date = Date(System.currentTimeMillis())
+    @ColumnInfo(name = "name") var name: String,
+    @ColumnInfo(name = "voice_name") var voiceName: String? = null,
+    @ColumnInfo(name = "last_access") var lastAccess: Date = Date(System.currentTimeMillis())
 )

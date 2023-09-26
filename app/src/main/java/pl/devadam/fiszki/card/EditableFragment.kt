@@ -8,26 +8,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.devadam.fiszki.R
+import pl.devadam.fiszki.deck.Activity
 import pl.devadam.fiszki.deck.ViewModel
 import java.util.Timer
 import java.util.TimerTask
 
-class EditableFragment constructor(
-    private val id: Long,
-    private var term: String,
-    private var definition: String
-): StaticFragment(id, term, definition) {
+class EditableFragment: Fragment() {
+
+    private var id: Long = -1
 
     private lateinit var viewModel: ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        id = arguments?.getLong(ARG_ID, -1) ?: -1
+        viewModel = ViewModelProvider(requireActivity()).get(ViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -42,20 +45,19 @@ class EditableFragment constructor(
             container, false
         )
 
-        viewModel = ViewModelProvider(requireActivity()).get(ViewModel::class.java)
-
         val termView = view.findViewById<TextView>(R.id.term)
         val definitionView = view.findViewById<TextView>(R.id.definition)
-        val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
 
-        termView.text = term
-        definitionView.text = definition
-        voiceButton.setOnClickListener { synthetizeTerm() }
-
-        val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
+        termView.text = viewModel.cards.value!!.find { it.id == id }?.term
+        definitionView.text = viewModel.cards.value!!.find { it.id == id }?.definition
 
         setupTextWatcher(termView) { viewModel.updateCardTerm(id, it) }
         setupTextWatcher(definitionView) { viewModel.updateCardDefinition(id, it) }
+
+        val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
+        val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
+
+        voiceButton.setOnClickListener { synthesizeTerm() }
         removeButton.setOnClickListener { remove() }
 
         return view
@@ -93,10 +95,23 @@ class EditableFragment constructor(
         })
     }
 
-    companion object {
+    private fun synthesizeTerm() {
 
-        fun newInstance(id: Long, term: String, definition: String): EditableFragment {
-            return EditableFragment(id, term, definition)
+        val term = viewModel.cards.value!!.find { it.id == id }?.term ?: return
+
+        println("speak ${term}")
+        (activity as? Activity)?.speak(term)
+    }
+
+    companion object {
+        private const val ARG_ID = "card_id"
+
+        fun newInstance(id: Long): EditableFragment {
+            val fragment = EditableFragment()
+            val args = Bundle()
+            args.putLong(ARG_ID, id)
+            fragment.arguments = args
+            return fragment
         }
     }
 }
