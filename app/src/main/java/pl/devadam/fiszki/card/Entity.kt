@@ -18,7 +18,7 @@ import pl.devadam.fiszki.deck.Entity as DeckEntity
 data class Entity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Long = 0,
-    @ColumnInfo(name = "term") val term: String,
-    @ColumnInfo(name = "definition") val definition: String,
+    @ColumnInfo(name = "term") var term: String,
+    @ColumnInfo(name = "definition") var definition: String,
     @ColumnInfo(name = "deck_id") val deckId: Long
 )

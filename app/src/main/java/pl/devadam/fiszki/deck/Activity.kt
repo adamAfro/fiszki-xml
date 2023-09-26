@@ -45,8 +45,9 @@ class Activity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
 
-        observeRelatedEntity()
-        observeVoices()
+        initRenderEntity()
+        initRenderCards()
+        initVoicesObserver()
 
         load()
 
@@ -57,23 +58,41 @@ class Activity : AppCompatActivity() {
         setupTextWatcher(nameText) { viewModel.updateName(it) }
     }
 
-    private fun observeRelatedEntity() = viewModel.deckData.observe(this, Observer { deckWithCards ->
+    private fun initRenderEntity() {
 
-        if (deckWithCards == null)
-            return@Observer
+        viewModel.name.observe(this, Observer {
 
-        renderCards(deckWithCards.cards)
-        rename(deckWithCards.deck.name)
-        if (deckWithCards.deck.preferredVoice != null)
-            selectVoice(deckWithCards.deck.preferredVoice)
+            if (it == null) return@Observer
+
+            viewModel.name.removeObservers(this)
+            rename(it)
+        })
+
+        viewModel.voiceName.observe(this, Observer {
+
+            if (it == null) return@Observer
+
+            viewModel.voiceName.removeObservers(this)
+            selectVoice(it)
+        })
+    }
+
+    private fun initRenderCards() = viewModel.cards.observe(this, Observer {
+
+        if (it == null) return@Observer
+
+        viewModel.cards.removeObservers(this)
+        vanishCards()
+        renderCards(it)
     })
 
-    private fun observeVoices() = viewModel.voices.observe(this, Observer {
+    private fun initVoicesObserver() = viewModel.voices.observe(this, Observer {
 
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
 
-        insertVoices(viewModel.getTTSVoicesNames())
+        viewModel.voices.removeObservers(this)
 
+        insertVoices(viewModel.getTTSVoicesNames())
         setupVoiceChangeWatcher(voiceSpinner, it) { changeVoice(it) }
     })
 
@@ -118,27 +137,21 @@ class Activity : AppCompatActivity() {
     private fun insertVoices(names: List<String>) {
 
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-
         voiceSpinner.adapter = ArrayAdapter(this@Activity,
             android.R.layout.simple_spinner_item, names
         )
 
-        if (viewModel.deckData.value != null)
-            selectVoice(viewModel.deckData.value!!.deck.preferredVoice)
+        if (viewModel.voiceName.value != null)
+            selectVoice(viewModel.voiceName.value)
     }
 
     private fun selectVoice(name: String?) {
 
-        if (viewModel.deckData.value == null)
+        if (viewModel.voiceName.value == null)
             throw Exception("Deck not loaded yet")
 
-        //viewModel.deckData.value!!.deck.preferredVoice = name
-        if (viewModel.textToSpeech.value?.voice == null)
-            return
-
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-        val adapter = voiceSpinner.adapter
-
+        val adapter = voiceSpinner.adapter ?: return
         val pos = (0 until adapter.count)
             .firstOrNull { adapter.getItem(it) == name } ?: 0
 
@@ -159,7 +172,7 @@ class Activity : AppCompatActivity() {
 
         for (card in cards) additions.add(
             R.id.cardsList,
-            EditableFragment.newInstance(card.id, card.term, card.definition)
+            EditableFragment.newInstance(card.id)
         )
 
         additions.commit()
@@ -172,10 +185,22 @@ class Activity : AppCompatActivity() {
 
         addition.add(
             R.id.cardsList,
-            EditableFragment.newInstance(card.id, card.term, card.definition)
+            EditableFragment.newInstance(card.id)
         )
 
         addition.commit()
+    }
+
+    private fun vanishCards() {
+
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        for (fragment in fragmentManager.fragments) {
+            fragmentTransaction.remove(fragment)
+        }
+
+        fragmentTransaction.commit()
     }
 
     private fun setupVoiceChangeWatcher(voiceSpinner: Spinner, voices: Set<Voice>, changeVoice: (Voice?) -> Unit) {
