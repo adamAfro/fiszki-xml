@@ -27,6 +27,7 @@ import java.util.Timer
 import java.util.TimerTask
 import pl.devadam.fiszki.card.Entity as CardEntity
 import pl.devadam.fiszki.pocket.Activity as PocketActivity
+import pl.devadam.fiszki.stack.Activity as StackActivity
 
 class Activity : AppCompatActivity() {
 
@@ -38,6 +39,7 @@ class Activity : AppCompatActivity() {
         setContentView(R.layout.activity_deck)
 
         val addButton = findViewById<ImageButton>(R.id.addCardButton)
+        val playButton = findViewById<ImageButton>(R.id.playButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
@@ -51,6 +53,7 @@ class Activity : AppCompatActivity() {
 
         load()
 
+        playButton.setOnClickListener { redirectToStack() }
         menuButton.setOnClickListener { redirectToPocket() }
         addButton.setOnClickListener { addCard() }
         removeButton.setOnClickListener { remove() }
@@ -242,6 +245,14 @@ class Activity : AppCompatActivity() {
 
         startActivity(Intent(this, PocketActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        })
+    }
+
+    private fun redirectToStack() {
+
+        startActivity(Intent(this, StackActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            putExtra("deck_id", viewModel.id)
         })
     }
 }

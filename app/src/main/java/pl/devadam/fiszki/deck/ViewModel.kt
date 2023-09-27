@@ -19,7 +19,7 @@ class ViewModel(application: Application) : TTSViewModel(application) {
     val voiceName = _voiceName as LiveData<String>
 
     private var _id: Long? = null
-    private val id: Long
+    val id: Long
         get() {
             return _id ?: throw IllegalStateException("ID is null")
         }
