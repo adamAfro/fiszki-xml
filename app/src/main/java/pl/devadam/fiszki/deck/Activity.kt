@@ -45,6 +45,10 @@ class Activity : AppCompatActivity() {
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
         val removeButton = findViewById<ImageButton>(R.id.removeDeckButton)
 
+        voiceSpinner.adapter = ArrayAdapter(this@Activity,
+            android.R.layout.simple_spinner_item, listOf("No voices available")
+        )
+
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
 
         initRenderEntity()
@@ -141,7 +145,7 @@ class Activity : AppCompatActivity() {
 
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
         voiceSpinner.adapter = ArrayAdapter(this@Activity,
-            android.R.layout.simple_spinner_item, names
+            android.R.layout.simple_spinner_item, if (names.isNotEmpty()) names else listOf("No voices available")
         )
 
         if (viewModel.voiceName.value != null)

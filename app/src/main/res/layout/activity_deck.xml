@@ -25,48 +25,62 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="top|center_vertical|end"
+                android:gravity="start|end"
                 android:orientation="horizontal">
 
                 <ImageButton
+                    style="@style/Icon"
                     android:id="@+id/removeDeckButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white"
-                    android:src="@drawable/baseline_delete_forever_64" />
+                    android:layout_width="32dp"
+                    android:layout_height="48dp"
+                    android:paddingVertical="12dp"
+                    android:paddingLeft="8dp"
+                    android:src="@drawable/bin" />
 
-                <LinearLayout
+                <EditText
+                    android:id="@+id/deckName"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <EditText
-                        android:id="@+id/deckName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/white"
-                        android:inputType="text"
-                        android:paddingHorizontal="30dp"
-                        android:text="@string/deck_name_placeholder"
-                        android:textSize="24sp" />
-
-                    <Spinner
-                        android:id="@+id/spinnerVoice"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp" />
-
-                </LinearLayout>
+                    android:background="@color/white"
+                    android:inputType="text"
+                    android:paddingHorizontal="12dp"
+                    android:text="@string/deck_name_placeholder"
+                    android:textSize="24sp" />
 
                 <ImageButton
                     android:id="@+id/menuButton"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="0"
-                    android:background="#00FFFFFF"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    style="@style/Icon"
                     android:contentDescription="@string/menu_button"
-                    android:src="@drawable/baseline_menu_64" />
+                    android:padding="8dp"
+                    android:src="@drawable/menu" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:paddingVertical="8dp"
+                android:paddingLeft="42dp"
+                android:paddingRight="8dp">
+
+                <ImageView
+                    style="@style/Icon"
+                    android:id="@+id/imageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_chat" />
+
+                <Spinner
+                    android:id="@+id/spinnerVoice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/transparent" />
             </LinearLayout>
 
             <LinearLayout
@@ -78,45 +92,37 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingVertical="60dp">
-
-            </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
 
     <ImageButton
+        style="@style/Icon"
         android:id="@+id/addCardButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:adjustViewBounds="false"
-        android:background="#00FFFFFF"
         android:contentDescription="@string/add_card_button"
         android:cropToPadding="true"
-        android:scaleType="centerInside"
-        android:src="@drawable/baseline_add_box_64"
+        android:src="@drawable/add_box"
+        app:tint="@color/light_blue_400"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/scrollView2"
-        app:layout_constraintVertical_bias="0.976" />
+        app:layout_constraintVertical_bias="0.955" />
 
     <ImageButton
+        style="@style/Icon"
         android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/transparent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/play"
+        app:tint="@color/light_blue_600"
         app:layout_constraintBottom_toBottomOf="@+id/addCardButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.165"
+        app:layout_constraintHorizontal_bias="0.565"
         app:layout_constraintStart_toEndOf="@+id/addCardButton"
         app:layout_constraintTop_toTopOf="@+id/addCardButton"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/baseline_play_arrow_64" />
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
