@@ -11,27 +11,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/black"
         app:cardCornerRadius="30dp">
 
         <ImageButton
             android:id="@+id/removeCardButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:src="@drawable/baseline_remove_circle_outline_64" />
+            android:src="@drawable/minus_circle"
+            app:tint="@color/gray_400" />
 
         <ImageButton
             android:id="@+id/voiceButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             android:paddingRight="10dp"
             android:paddingBottom="10dp"
-            android:src="@drawable/baseline_volume_up_64" />
+            android:src="@drawable/volume_up"
+            app:tint="@color/gray_400" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,20 +45,21 @@
                 android:id="@+id/term"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@color/transparent"
                 android:gravity="center"
                 android:inputType="text"
                 android:lines="2"
                 android:maxLines="2"
                 android:text="@string/card_term_placeholder"
                 android:textAlignment="gravity"
+                android:textColor="@color/gray_400"
                 android:textSize="20sp" />
 
             <EditText
                 android:id="@+id/definition"
                 android:layout_width="match_parent"
                 android:layout_height="63dp"
-                android:background="@color/white"
+                android:background="@color/transparent"
                 android:gravity="top"
                 android:inputType="text"
                 android:lines="3"
@@ -64,6 +67,7 @@
                 android:minLines="1"
                 android:paddingVertical="15dp"
                 android:text="@string/card_definition_placeholder"
+                android:textColor="@color/gray_400"
                 android:textSize="12sp" />
 
             <ImageView

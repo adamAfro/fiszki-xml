@@ -2,16 +2,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="300dp"
-    android:layout_height="300dp"
-    android:padding="30dp"
+    android:layout_width="240dp"
+    android:layout_height="240dp"
     tools:context=".card.StaticFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/black"
         app:cardCornerRadius="30dp">
 
         <ImageButton
@@ -19,10 +18,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:background="@color/white"
+            android:background="@color/transparent"
             android:paddingRight="10dp"
             android:paddingBottom="10dp"
-            android:src="@drawable/baseline_volume_up_64" />
+            android:src="@drawable/volume_up"
+            app:tint="@color/gray_400" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,7 +34,8 @@
                 android:id="@+id/term"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@color/transparent"
+                android:textColor="@color/gray_400"
                 android:gravity="center"
                 android:lines="2"
                 android:maxLines="2"
@@ -46,13 +47,14 @@
                 android:id="@+id/definition"
                 android:layout_width="match_parent"
                 android:layout_height="63dp"
-                android:background="@color/white"
+                android:background="@color/transparent"
                 android:gravity="top"
                 android:lines="3"
                 android:maxLines="3"
                 android:minLines="1"
                 android:paddingVertical="15dp"
                 android:text="@string/card_definition_placeholder"
+                android:textColor="@color/gray_400"
                 android:textSize="12sp" />
 
             <ImageView

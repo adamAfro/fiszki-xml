@@ -19,6 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <LinearLayout
@@ -27,52 +28,42 @@
                 android:gravity="top|center_vertical|end"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="30dp"
-                        android:text="@string/pocket_title"
-                        android:textSize="24sp" />
-
-                </LinearLayout>
+                    android:background="@color/white"
+                    android:inputType="text"
+                    android:paddingHorizontal="12dp"
+                    android:text="@string/pocket_title"
+                    android:textSize="24sp" />
 
                 <ImageButton
+                    style="@style/Icon"
                     android:id="@+id/menuButton"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_weight="0"
-                    android:background="#00FFFFFF"
                     android:contentDescription="@string/menu_button"
-                    android:src="@drawable/baseline_close_64" />
+                    android:padding="8dp"
+                    android:src="@drawable/cross" />
 
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/decksList"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="30dp">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/decksList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/addDeckButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_deck_button" />
             </LinearLayout>
+
+            <ImageButton
+                style="@style/Icon"
+                android:id="@+id/addDeckButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/add_box" />
 
         </LinearLayout>
     </ScrollView>

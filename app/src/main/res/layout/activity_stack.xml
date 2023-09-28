@@ -7,31 +7,48 @@
     tools:context=".stack.Activity">
 
     <LinearLayout
-        android:id="@+id/cardContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="33dp"
-        tools:layout_editor_absoluteY="-31dp"></LinearLayout>
+        android:orientation="vertical">
 
-    <ImageButton
-        android:id="@+id/putBackButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/cardContainer"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_replay_24" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
 
-    <ImageButton
-        android:id="@+id/removeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/cardContainer"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_done_24" />
+            <ImageButton
+                android:id="@+id/removeButton"
+                style="@style/Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="12dp"
+                android:src="@drawable/mark_done" />
+
+            <FrameLayout
+                android:id="@+id/cardContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/putBackButton"
+                style="@style/Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="12dp"
+                android:src="@drawable/replay_arrow" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/responseContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+        </FrameLayout>
+
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

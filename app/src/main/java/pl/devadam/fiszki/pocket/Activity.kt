@@ -2,6 +2,7 @@ package pl.devadam.fiszki.pocket
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -26,7 +27,7 @@ class Activity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
 
-        val addButton = findViewById<Button>(R.id.addDeckButton)
+        val addButton = findViewById<ImageButton>(R.id.addDeckButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
 
         loadDecks()
@@ -55,7 +56,8 @@ class Activity : AppCompatActivity() {
 
         for (deck in decks) {
 
-            val button = Button(this)
+            val button = Button(ContextThemeWrapper(this, R.style.DeckButton), null, 0)
+
 
             button.text = deck.name
             button.setOnClickListener {redirectToDeck(deck.id) }
