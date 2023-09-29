@@ -54,13 +54,13 @@ class ViewModel(application: Application) : TTSViewModel(application) {
 
         val dao = Manager.accessData(getApplication())
 
+        dao.deleteCardsInDeck(id)
         dao.deleteDeck(id)
-        _id = null
+
         _name.postValue(null)
         _voiceName.postValue(null)
-
-        dao.deleteCardsInDeck(id)
         _cards.postValue(null)
+        _id = null
     }
 
     fun updateName(name: String) {

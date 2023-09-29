@@ -33,6 +33,36 @@ class Activity : AppCompatActivity() {
 
     private lateinit var viewModel: ViewModel
 
+    var name: String?
+
+        get() {
+            return findViewById<TextView>(R.id.deckName).text.toString()
+        }
+
+        set(value) {
+            findViewById<TextView>(R.id.deckName).text = value
+        }
+
+
+    private var spinnerVoiceName: String? = ""
+    private var voiceName: String?
+
+        get() { return spinnerVoiceName }
+
+        set(value) {
+
+            if (viewModel.voiceName.value == null)
+                throw Exception("Deck not loaded yet")
+
+            val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
+            val adapter = voiceSpinner.adapter ?: return
+            val pos = (0 until adapter.count)
+                .firstOrNull { adapter.getItem(it) == value } ?: 0
+
+            spinnerVoiceName = value
+            voiceSpinner.setSelection(pos)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -42,12 +72,9 @@ class Activity : AppCompatActivity() {
         val playButton = findViewById<ImageButton>(R.id.playButton)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
         val nameText = findViewById<TextView>(R.id.deckName)
-        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
         val removeButton = findViewById<ImageButton>(R.id.removeDeckButton)
 
-        voiceSpinner.adapter = ArrayAdapter(this@Activity,
-            android.R.layout.simple_spinner_item, listOf("No voices available")
-        )
+        noVoicesFallback()
 
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
 
@@ -60,9 +87,9 @@ class Activity : AppCompatActivity() {
         playButton.setOnClickListener { redirectToStack() }
         menuButton.setOnClickListener { redirectToPocket() }
         addButton.setOnClickListener { addCard() }
-        removeButton.setOnClickListener { remove() }
+        removeButton.setOnClickListener { applyRemoval() }
 
-        setupTextWatcher(nameText) { viewModel.updateName(it) }
+        setupTextWatcher(nameText) { applyName(it) }
     }
 
     private fun initRenderEntity() {
@@ -72,7 +99,7 @@ class Activity : AppCompatActivity() {
             if (it == null) return@Observer
 
             viewModel.name.removeObservers(this)
-            rename(it)
+            name = it
         })
 
         viewModel.voiceName.observe(this, Observer {
@@ -80,7 +107,7 @@ class Activity : AppCompatActivity() {
             if (it == null) return@Observer
 
             viewModel.voiceName.removeObservers(this)
-            selectVoice(it)
+            voiceName = it
         })
     }
 
@@ -95,12 +122,10 @@ class Activity : AppCompatActivity() {
 
     private fun initVoicesObserver() = viewModel.voices.observe(this, Observer {
 
-        val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-
         viewModel.voices.removeObservers(this)
 
         insertVoices(viewModel.getTTSVoicesNames())
-        setupVoiceChangeWatcher(voiceSpinner, it) { changeVoice(it) }
+        setupVoiceChangeWatcher(findViewById<Spinner>(R.id.spinnerVoice), it) { applyVoice(it) }
     })
 
     private fun load() = CoroutineScope(Dispatchers.IO).launch {
@@ -111,10 +136,8 @@ class Activity : AppCompatActivity() {
     private fun getPassedId(): Long? {
 
         val id = intent.getLongExtra("deck_id", -1)
-        if (id >= 0)
-            return id
-        else
-            return null
+
+        return if (id >= 0) id else null
     }
 
     private fun addCard() = CoroutineScope(Dispatchers.IO).launch {
@@ -124,16 +147,21 @@ class Activity : AppCompatActivity() {
         withContext(Dispatchers.Main) { renderCard(card) }
     }
 
-    private fun remove() = CoroutineScope(Dispatchers.IO).launch {
+    private fun applyRemoval() = CoroutineScope(Dispatchers.IO).launch {
 
         viewModel.removeRelatedEntity()
         redirectToPocket()
     }
 
-    private fun changeVoice(voice: Voice?) = CoroutineScope(Dispatchers.IO).launch {
+    private fun applyVoice(voice: Voice?) = CoroutineScope(Dispatchers.IO).launch {
 
         viewModel.textToSpeech.value?.voice = voice
         viewModel.updateVoice(voice?.name)
+    }
+
+    private fun applyName(name: String) = CoroutineScope(Dispatchers.IO).launch {
+
+        viewModel.updateName(name)
     }
 
     fun speak(text: String) {
@@ -145,31 +173,20 @@ class Activity : AppCompatActivity() {
 
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
         voiceSpinner.adapter = ArrayAdapter(this@Activity,
-            android.R.layout.simple_spinner_item, if (names.isNotEmpty()) names else listOf("No voices available")
+            android.R.layout.simple_spinner_item, names.ifEmpty { listOf("No voices available") }
         )
 
         if (viewModel.voiceName.value != null)
-            selectVoice(viewModel.voiceName.value)
+            voiceName = viewModel.voiceName.value
     }
 
-    private fun selectVoice(name: String?) {
-
-        if (viewModel.voiceName.value == null)
-            throw Exception("Deck not loaded yet")
+    private fun noVoicesFallback() {
 
         val voiceSpinner = findViewById<Spinner>(R.id.spinnerVoice)
-        val adapter = voiceSpinner.adapter ?: return
-        val pos = (0 until adapter.count)
-            .firstOrNull { adapter.getItem(it) == name } ?: 0
 
-        voiceSpinner.setSelection(pos)
-    }
-
-    private fun rename(name: String) {
-
-        val nameText = findViewById<TextView>(R.id.deckName)
-
-        nameText.text = name
+        voiceSpinner.adapter = ArrayAdapter(this@Activity,
+            android.R.layout.simple_spinner_item, listOf("No voices available")
+        )
     }
 
     private fun renderCards(cards: List<CardEntity>) {
@@ -210,12 +227,13 @@ class Activity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    private fun setupVoiceChangeWatcher(voiceSpinner: Spinner, voices: Set<Voice>, changeVoice: (Voice?) -> Unit) {
+    private fun setupVoiceChangeWatcher(voiceSpinner: Spinner, voices: Set<Voice>, voiceChange: (Voice?) -> Unit) {
         voiceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedVoiceName = parent?.getItemAtPosition(position).toString()
                 val voice = voices.firstOrNull { it.name == selectedVoiceName }
-                changeVoice(voice)
+                spinnerVoiceName = voice?.name
+                voiceChange(voice)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}

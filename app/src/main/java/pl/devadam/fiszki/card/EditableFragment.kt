@@ -47,23 +47,40 @@ class EditableFragment: Fragment() {
 
         val termView = view.findViewById<TextView>(R.id.term)
         val definitionView = view.findViewById<TextView>(R.id.definition)
+        val entity = getEntity()
 
-        termView.text = viewModel.cards.value!!.find { it.id == id }?.term
-        definitionView.text = viewModel.cards.value!!.find { it.id == id }?.definition
+        termView.text = entity.term
+        definitionView.text = entity.definition
 
-        setupTextWatcher(termView) { viewModel.updateCardTerm(id, it) }
-        setupTextWatcher(definitionView) { viewModel.updateCardDefinition(id, it) }
+        setupTextWatcher(termView) { applyTerm(it) }
+        setupTextWatcher(definitionView) { applyDefinition(it) }
 
         val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
         val removeButton = view.findViewById<ImageButton>(R.id.removeCardButton)
 
         voiceButton.setOnClickListener { synthesizeTerm() }
-        removeButton.setOnClickListener { remove() }
+        removeButton.setOnClickListener { applyRemoval() }
 
         return view
     }
 
-    private fun remove() = CoroutineScope(Dispatchers.IO).launch {
+    private fun getEntity(): Entity {
+
+        return viewModel.cards.value!!.find { it.id == id }
+            ?: throw ExceptionInInitializerError("Nonexistent card in EditableFragment")
+    }
+
+    private fun applyTerm(term: String) = CoroutineScope(Dispatchers.IO).launch {
+
+        viewModel.updateCardTerm(id, term)
+    }
+
+    private fun applyDefinition(definition: String) = CoroutineScope(Dispatchers.IO).launch {
+
+        viewModel.updateCardDefinition(id, definition)
+    }
+
+    private fun applyRemoval() = CoroutineScope(Dispatchers.IO).launch {
 
         viewModel.removeCard(id)
 

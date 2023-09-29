@@ -16,36 +16,36 @@ interface Dao {
     fun insertCard(card: CardEntity): Long
 
     @Query("DELETE FROM stored_cards WHERE id = :cardId")
-    fun deleteCard(cardId: Long)
+    fun deleteCard(cardId: Long): Void
 
     @Query("UPDATE stored_cards SET term = :term WHERE id = :cardId")
-    fun updateTerm(cardId: Long, term: String)
+    fun updateTerm(cardId: Long, term: String): Void
 
     @Query("UPDATE stored_cards SET definition = :definition WHERE id = :cardId")
-    fun updateDefinition(cardId: Long, definition: String)
+    fun updateDefinition(cardId: Long, definition: String): Void
 
 
     @Insert(entity = DeckEntity::class)
     fun insertDeck(deck: DeckEntity): Long
 
     @Query("DELETE FROM stored_decks WHERE id = :deckId")
-    fun deleteDeck(deckId: Long)
+    fun deleteDeck(deckId: Long): Void
 
     @Query("SELECT * FROM stored_decks")
     fun getAllDecks(): List<DeckEntity>
 
     @Query("UPDATE stored_decks SET name = :name WHERE id = :deckId")
-    fun updateDeckName(deckId: Long, name: String)
+    fun updateDeckName(deckId: Long, name: String): Void
 
     @Query("UPDATE stored_decks SET voice_name = :voiceName WHERE id = :deckId")
-    fun updateDeckVoiceName(deckId: Long, voiceName: String?)
+    fun updateDeckVoiceName(deckId: Long, voiceName: String?): Void
 
 
     @Query("SELECT * FROM stored_cards WHERE deck_id = :deckId")
     fun getCardsFromDeck(deckId: Long): List<CardEntity>
 
     @Query("DELETE FROM stored_cards WHERE deck_id = :deckId")
-    fun deleteCardsInDeck(deckId: Long)
+    fun deleteCardsInDeck(deckId: Long): Void
 
 
     @Transaction
