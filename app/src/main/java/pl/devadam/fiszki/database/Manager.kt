@@ -4,6 +4,7 @@ import androidx.room.Room
 import pl.devadam.fiszki.database.Abstraction
 import pl.devadam.fiszki.database.Dao
 
+// TODO add function that will allow user exporting and importing decks
 object Manager {
 
     private var database: Abstraction? = null

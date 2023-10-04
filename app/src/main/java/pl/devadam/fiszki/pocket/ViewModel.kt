@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import pl.devadam.fiszki.deck.Entity
 
+// TODO (for later) allow user to store files on the device as files instead of using database
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getDecks(): List<Entity> {

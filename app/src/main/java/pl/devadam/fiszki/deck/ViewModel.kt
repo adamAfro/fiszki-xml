@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import pl.devadam.fiszki.TTSViewModel
 import pl.devadam.fiszki.card.Entity as CardEntity
 
+// TODO (for later) allow user to store files on the device as files instead of using database
 class ViewModel(application: Application) : TTSViewModel(application) {
 
     private val _cards = MutableLiveData<MutableList<CardEntity>>()

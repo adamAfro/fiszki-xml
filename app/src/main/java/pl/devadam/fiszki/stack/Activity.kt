@@ -17,6 +17,13 @@ import pl.devadam.fiszki.card.Entity
 import pl.devadam.fiszki.card.StaticFragment
 import pl.devadam.fiszki.deck.Activity as DeckActivity
 
+// TODO add swipe gestures and animations
+// TODO disable "put back button" if there is no next card
+// TODO minigame: user must tell the answer
+// TODO minigame: user must write the answer
+// TODO minigame: user must choose the answer among other which are wrong
+// TODO minigame: user must arrange given words to form the answer, some of them are wrong
+// TODO minigame: user must choose the answer among other which are wrong anagrams of the correct one or are slightly different
 class Activity : AppCompatActivity() {
 
     private lateinit var viewModel: ViewModel

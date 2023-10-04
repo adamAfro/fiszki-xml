@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
+// TODO share TTS between activities if possible
 open class TTSViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _textToSpeech = MutableLiveData<TextToSpeech>()
@@ -15,6 +16,7 @@ open class TTSViewModel(application: Application) : AndroidViewModel(application
     private val _voices = MutableLiveData<Set<Voice>>()
     val voices: LiveData<Set<Voice>> get() = _voices
 
+    // TODO order voices alphabetically, or with usage track - by usage
     fun getTTSVoicesNames(): List<String> {
 
         if (_textToSpeech.value == null || _textToSpeech.value!!.voices == null)

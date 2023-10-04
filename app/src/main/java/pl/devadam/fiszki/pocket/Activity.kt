@@ -16,6 +16,8 @@ import pl.devadam.fiszki.R
 import pl.devadam.fiszki.deck.Activity as DeckActivity
 import pl.devadam.fiszki.deck.Entity as DeckEntity
 
+// TODO add buttons allowing user to export and import decks
+// TODO (for later) add preferences where there is one which allows to store decks and cards as files, rather in DB
 class Activity : AppCompatActivity() {
 
     private lateinit var viewModel: ViewModel
