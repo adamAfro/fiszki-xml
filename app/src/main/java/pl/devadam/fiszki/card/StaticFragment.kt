@@ -15,6 +15,8 @@ import pl.devadam.fiszki.stack.ViewModel
 class StaticFragment: Fragment() {
 
     private var id: Long = -1
+    private var term: String = ""
+    private var definition: String = ""
 
     private lateinit var viewModel: ViewModel
 
@@ -22,6 +24,9 @@ class StaticFragment: Fragment() {
         super.onCreate(savedInstanceState)
 
         id = arguments?.getLong(ARG_ID, -1) ?: -1
+        term = arguments?.getString(ARG_TERM, "") ?: ""
+        definition = arguments?.getString(ARG_DEFINITION, "") ?: ""
+
         viewModel = ViewModelProvider(requireActivity())[ViewModel::class.java]
     }
 
@@ -40,11 +45,8 @@ class StaticFragment: Fragment() {
         val termView = view.findViewById<TextView>(R.id.term)
         val definitionView = view.findViewById<TextView>(R.id.definition)
 
-        val card = viewModel.cards.value!!
-            .find { it.id == id } ?: throw Exception("No card found")
-
-        termView.text = card.term
-        definitionView.text = card.definition
+        termView.text = term
+        definitionView.text = definition
 
         val voiceButton = view.findViewById<ImageButton>(R.id.voiceButton)
 
@@ -63,11 +65,15 @@ class StaticFragment: Fragment() {
 
     companion object {
         private const val ARG_ID = "card_id"
+        private const val ARG_TERM = "card_term"
+        private const val ARG_DEFINITION = "card_definition"
 
-        fun newInstance(id: Long): StaticFragment {
+        fun newInstance(id: Long, term: String, definition: String): StaticFragment {
             val fragment = StaticFragment()
             val args = Bundle()
             args.putLong(ARG_ID, id)
+            args.putString(ARG_TERM, term)
+            args.putString(ARG_DEFINITION, definition)
             fragment.arguments = args
             return fragment
         }

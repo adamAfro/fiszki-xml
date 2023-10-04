@@ -42,7 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@color/white"
+                    android:background="@color/transparent"
                     android:inputType="text"
                     android:paddingHorizontal="12dp"
                     android:text="@string/deck_name_placeholder"

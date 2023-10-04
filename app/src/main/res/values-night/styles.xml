@@ -3,6 +3,7 @@
     <style name="Icon">
 
         <item name="android:background">@color/transparent</item>
+        <item name="android:tint">@color/white</item>
         <item name="android:scaleType">fitXY</item>
 
     </style>

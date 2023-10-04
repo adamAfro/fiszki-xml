@@ -66,7 +66,7 @@ class Activity : AppCompatActivity() {
 
         addition.add(
             R.id.cardContainer,
-            StaticFragment.newInstance(card.id)
+            StaticFragment.newInstance(card.id, card.term, card.definition)
         )
 
         addition.commit()
