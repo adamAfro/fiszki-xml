@@ -12,11 +12,11 @@ class ViewModel(application: Application) : TTSViewModel(application) {
     private val _cards = MutableLiveData<MutableList<CardEntity>>()
     val cards = _cards as LiveData<MutableList<CardEntity>>
 
-    private val _name = MutableLiveData<String>()
-    val name = _name as LiveData<String>
+    private val _name = MutableLiveData<String?>()
+    val name = _name as LiveData<String?>
 
-    private val _voiceName = MutableLiveData<String>()
-    val voiceName = _voiceName as LiveData<String>
+    private val _voiceName = MutableLiveData<String?>()
+    val voiceName = _voiceName as LiveData<String?>
 
     private var _id: Long? = null
     val id: Long
@@ -59,7 +59,7 @@ class ViewModel(application: Application) : TTSViewModel(application) {
 
         _name.postValue(null)
         _voiceName.postValue(null)
-        _cards.postValue(null)
+        _cards.value!!.clear()
         _id = null
     }
 
